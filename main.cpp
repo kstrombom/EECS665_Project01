@@ -26,15 +26,15 @@ struct gDFADataStruct
 };
 
 // Function Declarations
-int VectorExistsAtIndex( vector<gDFADataStruct> aContainingVector, vector<int> aNewState );
-int getTransitionCharacterIndex( NFA aNFA, char aTransitionCharacter );
-vector<int> Move( NFA aNFA, vector<int> aStates, char aTransitionCharacter );
 bool UnmarkedStateExists(vector<gDFADataStruct> aDStates);
+vector<int> Move( NFA aNFA, vector<int> aStates, char aTransitionCharacter );
+vector<int> EClosure( NFA aNFA, vector<int> aStates );
 int getNextUnmarkedStateIndex( vector<gDFADataStruct> aDStates );
+int getTransitionCharacterIndex( NFA aNFA, char aTransitionCharacter );
+int VectorExistsAtIndex( vector<gDFADataStruct> aContainingVector, vector<int> aNewState );
+void printDFA( vector<gDFADataStruct> aDFAData, NFA aNFA );
 void printTransition( char aTransitionCharacter, vector<int> aInputVector, vector<int> aOutputVector );
 void printEClosure( vector<int> aStartStates, vector<int> aEClosure, int aState);
-vector<int> EClosure( NFA aNFA, vector<int> aStates );
-void printDFA( vector<gDFADataStruct> aDFAData, NFA aNFA );
 vector<int> getEndPointStates( vector<gDFADataStruct> aDFA, vector<int> aOldStates );
 
 int main(int argc, char* argv[])
@@ -46,9 +46,9 @@ int main(int argc, char* argv[])
 
     // Make transition template vector<tuple>
     vector<tuple<char,vector<int>,int>> lTransitionTemplate;
-    for( int i = 0; i < lNFA.mNumTransitionCharacters - 1; i++ )
+    for( unsigned int i = 0; i < lNFA.mNumTransitionCharacters - 1; i++ )
     {
-        tuple<char,vector<int>,int> lTuple = {lNFA.mTransitionCharacters[i], vector<int>(),-1};
+        tuple<char,vector<int>,int> lTuple {lNFA.mTransitionCharacters[i], vector<int>(),-1};
         lTransitionTemplate.push_back( lTuple );
     }
 
@@ -62,7 +62,7 @@ int main(int argc, char* argv[])
 
     // Print IO E closure
     cout << "E-closure(IO) = {";
-    for( int i = 0; i < lInitialNewStateVector.size(); i++ )
+    for( unsigned int i = 0; i < lInitialNewStateVector.size(); i++ )
     {
         if( i == lInitialNewStateVector.size() - 1 )
         {
@@ -88,7 +88,7 @@ int main(int argc, char* argv[])
         iMark++;
 
         // Loop through each transition character
-        for ( int iChar = 0; iChar < lNFA.mNumTransitionCharacters - 1; iChar++ )
+        for ( unsigned int iChar = 0; iChar < lNFA.mNumTransitionCharacters - 1; iChar++ )
         {
             vector<int> lMoveResults = Move( lNFA, lDFADataVector[lNextUnmarkedIndex].mNewStateVector, lNFA.mTransitionCharacters[iChar] );
             vector<int> lNewStateVector = EClosure( lNFA, lMoveResults );
@@ -144,43 +144,29 @@ int main(int argc, char* argv[])
 }
 
 /*
- * Description:
- * @Param
- * @Param
- * @return
+ * Description: Checks that an unmarked state exists in the DFA data
+ * @Param vector<gDFADataStruct> aDStates, The DFA data vector
+ * @return bool, true if an unmarked state exists and false if not
  */
-int VectorExistsAtIndex( vector<gDFADataStruct> aContainingVector, vector<int> aNewState )
+bool UnmarkedStateExists( vector<gDFADataStruct> aDStates )
 {
-    for( int iIndex = 0; iIndex < aContainingVector.size(); iIndex++ )
+    for ( gDFADataStruct iStruct : aDStates )
     {
-        if( aContainingVector[iIndex].mNewStateVector.size() == aNewState.size() )
+        if ( !iStruct.mMarked )
         {
-            bool lVectorFound = true;
-            for( int iState : aNewState )
-            {
-                // Did not find a value in vector
-                if( find( aContainingVector[iIndex].mNewStateVector.begin(),
-                          aContainingVector[iIndex].mNewStateVector.end(),
-                          iState ) == aContainingVector[iIndex].mNewStateVector.end() )
-                {
-                    lVectorFound = false;
-                    break;
-                }
-            }
-            if ( lVectorFound )
-            {
-                return iIndex;
-            }
+            return true;
         }
     }
-    return -1;
+
+    return false;
 }
 
 /*
- * Description:
- * @Param
- * @Param
- * @return
+ * Description: Does the move function for a given transition character on an input vector.
+ * @Param NFA aNFA
+ * @Param vector<int> aStates, the vector of states to move on
+ * @Param char aTransitionCharacter, the transition character to move with
+ * @return vector<int> lMoveStates, the states resulting from the move via the transition character.
  */
 vector<int> Move( NFA aNFA, vector<int> aStates, char aTransitionCharacter )
 {
@@ -205,137 +191,10 @@ vector<int> Move( NFA aNFA, vector<int> aStates, char aTransitionCharacter )
 }
 
 /*
- * Description:
- * @Param
- * @Param
- * @return
- */
-int getTransitionCharacterIndex( NFA aNFA, char aTransitionCharacter )
-{
-    for( int i = 0; i < aNFA.mTransitionCharacters.size(); i++ )
-    {
-        if ( aNFA.mTransitionCharacters[i] == aTransitionCharacter )
-        {
-            return i;
-        }
-    }
-    return -1;
-}
-
-/*
- * Description:
- * @Param
- * @Param
- * @return
- */
-int getNextUnmarkedStateIndex( vector<gDFADataStruct> aDStates )
-{
-    for ( int i = 0; i < aDStates.size(); i++ )
-    {
-        if ( !aDStates[i].mMarked )
-        {
-            return i;
-        }
-    }
-
-    return -1;
-}
-
-/*
- * Description:
- * @Param
- * @Param
- * @return
- */
-bool UnmarkedStateExists(vector<gDFADataStruct> aDStates)
-{
-    for ( gDFADataStruct iStruct : aDStates )
-    {
-        if ( !iStruct.mMarked )
-        {
-            return true;
-        }
-    }
-
-    return false;
-}
-
-/*
- * Description:
- * @Param
- * @Param
- * @return
- */
-void printEClosure( vector<int> aClosureOnVector, vector<int> aNewStateVector, int aState)
-{
-    cout << "E-closure{";
-    for( int i = 0; i < aClosureOnVector.size(); i++ )
-    {
-        if( i == aClosureOnVector.size() - 1 )
-        {
-            cout << aClosureOnVector[i] << "} = {";
-        }
-        else
-        {
-            cout << aClosureOnVector[i] << ",";
-        }
-    }
-
-    for( int i = 0; i < aNewStateVector.size(); i++ )
-    {
-        if( i == aNewStateVector.size() - 1 )
-        {
-            cout << aNewStateVector[i] << "} = " << aState<< endl;
-            return;
-        }
-        else
-        {
-            cout << aNewStateVector[i] << ", ";
-        }
-    }
-}
-
-/*
- * Description:
- * @Param
- * @Param
- * @return
- */
-void printTransition( char aTransitionCharacter, vector<int> aInputVector, vector<int> aOutputVector )
-{
-    cout << "{";
-    for( int i = 0; i < aInputVector.size(); i++ )
-    {
-        if( i == aInputVector.size() - 1 )
-        {
-            cout << aInputVector[i] << "}";
-        }
-        else
-        {
-            cout << aInputVector[i] << ", ";
-        }
-    }
-
-    cout << " --" << aTransitionCharacter << "--> {";
-
-    for( int i = 0; i < aOutputVector.size(); i++ )
-    {
-        if( i == aOutputVector.size() - 1 )
-        {
-            cout << aOutputVector[i] << "}\n";
-        }
-        else
-        {
-            cout << aOutputVector[i] << ", ";
-        }
-    }
-}
-
-/*
- * Description:
- * @Param
- * @Param
- * @return
+ * Description: Takes in a list of states and performs the E Closure
+ * @Param NFA aNFA
+ * @Param vector<int> aStates
+ * @return vector<int> lEClosure
  */
 vector<int> EClosure( NFA aNFA, vector<int> aStates )
 {
@@ -372,10 +231,81 @@ vector<int> EClosure( NFA aNFA, vector<int> aStates )
 }
 
 /*
- * Description:
- * @Param
- * @Param
- * @return
+ * Description: Retrieves the index of the next unmarked state.
+ * @Param vector<gDFADataStruct> aDStates, The DFA data vector
+ * @return int, index at which the unmarked state exists, -1 if no unmarked states exist
+ */
+int getNextUnmarkedStateIndex( vector<gDFADataStruct> aDStates )
+{
+    for ( unsigned int i = 0; i < aDStates.size(); i++ )
+    {
+        if ( !aDStates[i].mMarked )
+        {
+            return i;
+        }
+    }
+
+    return -1;
+}
+
+/*
+ * Description: Gets the index at which the transition character is stored in the table.
+ * @Param NFA aNFA
+ * @Param char aTransitionCharacter
+ * @return int, index if transition character is found, -1 if not.
+ */
+int getTransitionCharacterIndex( NFA aNFA, char aTransitionCharacter )
+{
+    for( unsigned int i = 0; i < aNFA.mTransitionCharacters.size(); i++ )
+    {
+        if ( aNFA.mTransitionCharacters[i] == aTransitionCharacter )
+        {
+            return i;
+        }
+    }
+    return -1;
+}
+
+
+/*
+ * Description: Checks that a given vector exists in the DFA data mNewStateVector
+ * @Param vector<gDFADataStruct> aContainingVector, DFA data struct
+ * @Param vector<int> aNewState, the vector to check if it exists already
+ * @return int, if the vector exists return the index in the DFA data it exists
+ *         if it doesn't exist return -1.
+ */
+int VectorExistsAtIndex( vector<gDFADataStruct> aContainingVector, vector<int> aNewState )
+{
+    for( unsigned int iIndex = 0; iIndex < aContainingVector.size(); iIndex++ )
+    {
+        if( aContainingVector[iIndex].mNewStateVector.size() == aNewState.size() )
+        {
+            bool lVectorFound = true;
+            for( int iState : aNewState )
+            {
+                // Did not find a value in vector
+                if( find( aContainingVector[iIndex].mNewStateVector.begin(),
+                          aContainingVector[iIndex].mNewStateVector.end(),
+                          iState ) == aContainingVector[iIndex].mNewStateVector.end() )
+                {
+                    lVectorFound = false;
+                    break;
+                }
+            }
+            if ( lVectorFound )
+            {
+                return iIndex;
+            }
+        }
+    }
+    return -1;
+}
+
+/*
+ * Description: Pretty prints the final DFA table, initial state, and final state(s)
+ * @Param vector<gDFADataStruct> aDFAData, the DFA data for an NFA to DFA conversion
+ * @Param NFA aNFA
+ * @return void
  */
 void printDFA( vector<gDFADataStruct> aDFAData, NFA aNFA )
 {
@@ -384,7 +314,7 @@ void printDFA( vector<gDFADataStruct> aDFAData, NFA aNFA )
     vector<int> lNewFinalState = getEndPointStates( aDFAData, aNFA.mFinalStates );
 
     cout << "Initial State: {";
-    for( int i = 0; i < lNewInitialState.size(); i++ )
+    for( unsigned int i = 0; i < lNewInitialState.size(); i++ )
     {
         if( i == lNewInitialState.size() - 1 )
         {
@@ -397,7 +327,7 @@ void printDFA( vector<gDFADataStruct> aDFAData, NFA aNFA )
     }
 
     cout << "Final States: {";
-    for( int i = 0; i < lNewFinalState.size(); i++ )
+    for( unsigned int i = 0; i < lNewFinalState.size(); i++ )
     {
         if( i == lNewFinalState.size() - 1 )
         {
@@ -410,7 +340,7 @@ void printDFA( vector<gDFADataStruct> aDFAData, NFA aNFA )
     }
 
     cout << "State  ";
-    for( int i = 0; i < aNFA.mTransitionCharacters.size() - 1; i++ )
+    for( unsigned int i = 0; i < aNFA.mTransitionCharacters.size() - 1; i++ )
     {
         if( i == aNFA.mTransitionCharacters.size() - 2 )
         {
@@ -424,7 +354,7 @@ void printDFA( vector<gDFADataStruct> aDFAData, NFA aNFA )
 
     // Print DFA table
     // Iterates through each new state data
-    for( int i = 0; i < aDFAData.size(); i++ )
+    for( unsigned int i = 0; i < aDFAData.size(); i++ )
     {
         cout << i + 1 << "      ";
         // Iterates through each transition in state
@@ -445,17 +375,90 @@ void printDFA( vector<gDFADataStruct> aDFAData, NFA aNFA )
 }
 
 /*
- * Description:
- * @Param
- * @Param
- * @return
+ * Description: Pretty prints an EClosure (not utilized for the initial E closure)
+ * @Param vector<int> aClosureOnVector, the closure on vector from DFA data struct
+ * @Param vector<int> aNewStateVector, the new state vector from DFA data struct which contains all the old states
+ * @Param int aState, the new identifier for the new state vector
+ * @return void
+ */
+void printEClosure( vector<int> aClosureOnVector, vector<int> aNewStateVector, int aState)
+{
+    cout << "E-closure{";
+    for( unsigned int i = 0; i < aClosureOnVector.size(); i++ )
+    {
+        if( i == aClosureOnVector.size() - 1 )
+        {
+            cout << aClosureOnVector[i] << "} = {";
+        }
+        else
+        {
+            cout << aClosureOnVector[i] << ",";
+        }
+    }
+
+    for( unsigned int i = 0; i < aNewStateVector.size(); i++ )
+    {
+        if( i == aNewStateVector.size() - 1 )
+        {
+            cout << aNewStateVector[i] << "} = " << aState<< endl;
+            return;
+        }
+        else
+        {
+            cout << aNewStateVector[i] << ", ";
+        }
+    }
+}
+
+/*
+ * Description: Pretty prints a transition.
+ * @Param char aTransitionCharacter, the character used for the transition
+ * @Param vector<int> aInputVector, the starting state vector
+ * @Param vector<int> aOutputVector, the state vector after the transition
+ * @return void
+ */
+void printTransition( char aTransitionCharacter, vector<int> aInputVector, vector<int> aOutputVector )
+{
+    cout << "{";
+    for( unsigned int i = 0; i < aInputVector.size(); i++ )
+    {
+        if( i == aInputVector.size() - 1 )
+        {
+            cout << aInputVector[i] << "}";
+        }
+        else
+        {
+            cout << aInputVector[i] << ", ";
+        }
+    }
+
+    cout << " --" << aTransitionCharacter << "--> {";
+
+    for( unsigned int i = 0; i < aOutputVector.size(); i++ )
+    {
+        if( i == aOutputVector.size() - 1 )
+        {
+            cout << aOutputVector[i] << "}\n";
+        }
+        else
+        {
+            cout << aOutputVector[i] << ", ";
+        }
+    }
+}
+
+/*
+ * Description: Takes the NFA initial or final states and finds the new DFA states they map to
+ * @Param vector<gDFADataStruct> aDFAData, the DFA data for an NFA to DFA conversion
+ * @Param vector<int> aOldStates, the vector of old initial or final states
+ * @return vector<int> lEndPoints, the new states for the DFA
  */
 vector<int> getEndPointStates( vector<gDFADataStruct> aDFAData, vector<int> aOldStates )
 {
     vector<int> lEndPoints;
     for( int iState : aOldStates )
     {
-        for( int iIndex = 0; iIndex < aDFAData.size(); iIndex++ )
+        for( unsigned int iIndex = 0; iIndex < aDFAData.size(); iIndex++ )
         {
             if( find( aDFAData[iIndex].mNewStateVector.begin(),
                 aDFAData[iIndex].mNewStateVector.end(),

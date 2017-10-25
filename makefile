@@ -12,8 +12,6 @@ OBJS = main.o nfa.o
 
 INPUT = input.txt
 INPUT2 = input_2.txt
-INPUT3 = input_3.txt
-INPUT4 = input_4.txt
 OUTPUT = output.txt
 
 CXX = g++
@@ -44,12 +42,6 @@ test: $(PROG)
 # test
 test2: $(PROG)
 	./$(PROG) < $(INPUT2)
-	# test
-test3: $(PROG)
-	./$(PROG) < $(INPUT3)
-# test
-test4: $(PROG)
-	./$(PROG) < $(INPUT4)
 
 # clean
 clean :
