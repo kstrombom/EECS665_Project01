@@ -36,7 +36,6 @@ void printEClosure( vector<int> aStartStates, vector<int> aEClosure, int aState)
 vector<int> EClosure( NFA aNFA, vector<int> aStates );
 void printDFA( vector<gDFADataStruct> aDFAData, NFA aNFA );
 vector<int> getEndPointStates( vector<gDFADataStruct> aDFA, vector<int> aOldStates );
-int getClosureOnIndex( vector<gDFADataStruct> aDFAData, vector<int> aMatchVector );
 
 int main(int argc, char* argv[])
 {
@@ -135,46 +134,6 @@ int main(int argc, char* argv[])
             {
                 printEClosure( lMoveResults, lNewStateVector, lVectorExistsIndex + 1 );
             }
-
-            //////DEBUG
-            cout<<"-------Struct at state "<<lNextUnmarkedIndex<<"----------"<<endl;
-            for (gDFADataStruct iStruct : lDFADataVector )
-            {
-                cout<<"Closureonvector: ";
-                for(int iCO: iStruct.mClosureOnVector)
-                {
-                    cout<<iCO<<", ";
-                }
-                cout<<endl;
-
-                cout<<"newstatevector: ";
-                for(int iNS: iStruct.mNewStateVector)
-                {
-                    cout<<iNS<<", ";
-                }
-                cout<<endl;
-
-                cout<<"marked: "<< ((iStruct.mMarked) ? "true" : "false");
-                cout<<endl;
-
-                cout<<"tuples:"<<endl;
-
-                for(tuple<char,vector<int>,int> iTuple : iStruct.mTransitionsVector)
-                {
-                    cout<<"     trans "<<get<0>(iTuple)<<": ";
-                    for(int itrans: get<1>(iTuple))
-                    {
-                        cout<<itrans<<", ";
-                    }
-                    cout<<endl;
-                    cout<<"     state "<<get<2>(iTuple)<<endl;
-                }
-                cout<<endl;
-            }
-            cout<<"-----------------------------------------\n";
-            //////DEBUG
-
-
         }
     }
 
@@ -417,17 +376,6 @@ void printDFA( vector<gDFADataStruct> aDFAData, NFA aNFA )
         // Iterates through each transition in state
         for( tuple<char,vector<int>,int> iTrans : aDFAData[i].mTransitionsVector )
         {
-            // New state
-            /*
-            int lNewState = getClosureOnIndex( aDFAData, get<1>( iTrans ) ) + 1;
-            if( lNewState == 0 )
-            {
-                cout << "{}     ";
-            }
-            else
-            {
-                cout << "{" << lNewState << "}    ";
-            }*/
             int lNewState = get<2>(iTrans);
             if( lNewState == -1 )
             {
@@ -440,33 +388,6 @@ void printDFA( vector<gDFADataStruct> aDFAData, NFA aNFA )
         }
         cout << endl;
     }
-}
-
-int getClosureOnIndex( vector<gDFADataStruct> aDFAData, vector<int> aMatchVector )
-{
-    for( int iIndex = 0; iIndex < aDFAData.size(); iIndex++ )
-    {
-        if( aDFAData[iIndex].mClosureOnVector.size() == aMatchVector.size() )
-        {
-            bool lVectorFound = true;
-            for( int iState : aMatchVector )
-            {
-                // Did not find a value in vector
-                if( find( aDFAData[iIndex].mClosureOnVector.begin(),
-                          aDFAData[iIndex].mClosureOnVector.end(),
-                          iState ) == aDFAData[iIndex].mClosureOnVector.end() )
-                {
-                    lVectorFound = false;
-                    break;
-                }
-            }
-            if ( lVectorFound )
-            {
-                return iIndex;
-            }
-        }
-    }
-    return -1;
 }
 
 vector<int> getEndPointStates( vector<gDFADataStruct> aDFAData, vector<int> aOldStates )
