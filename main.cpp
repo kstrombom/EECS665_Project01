@@ -22,7 +22,7 @@ struct gDFADataStruct
     vector<int> mClosureOnVector;
     vector<int> mNewStateVector;
     bool mMarked;
-    vector<tuple<char,vector<int>>> mTransitionsVector;
+    vector<tuple<char,vector<int>,int>> mTransitionsVector;
 };
 
 // Function Declarations
@@ -46,10 +46,10 @@ int main(int argc, char* argv[])
     vector<gDFADataStruct> lDFADataVector;
 
     // Make transition template vector<tuple>
-    vector<tuple<char,vector<int>>> lTransitionTemplate;
+    vector<tuple<char,vector<int>,int>> lTransitionTemplate;
     for( int i = 0; i < lNFA.mNumTransitionCharacters - 1; i++ )
     {
-        tuple<char,vector<int>> lTuple = {lNFA.mTransitionCharacters[i], vector<int>()};
+        tuple<char,vector<int>,int> lTuple = {lNFA.mTransitionCharacters[i], vector<int>(),-1};
         lTransitionTemplate.push_back( lTuple );
     }
 
@@ -99,12 +99,21 @@ int main(int argc, char* argv[])
             if( !lNewStateVector.empty() )
             {
                 //store the transition in current vector
-                vector<tuple<char,vector<int>>> & lTupleVector = lDFADataVector[lNextUnmarkedIndex].mTransitionsVector;
-                for ( tuple<char,vector<int>> & iTuple : lTupleVector )
+                vector<tuple<char,vector<int>,int>> & lTupleVector = lDFADataVector[lNextUnmarkedIndex].mTransitionsVector;
+                for ( tuple<char,vector<int>,int> & iTuple : lTupleVector )
                 {
                     if (get<0>(iTuple) == lNFA.mTransitionCharacters[iChar] )
                     {
                         get<1>(iTuple) = lMoveResults;
+
+                        if( lVectorExistsIndex == -1 )
+                        {
+                            get<2>(iTuple) = lDFADataVector.size() + 1;
+                        }
+                        else
+                        {
+                            get<2>(iTuple) = lVectorExistsIndex + 1;
+                        }
                     }
                 }
             }
@@ -128,7 +137,6 @@ int main(int argc, char* argv[])
             }
 
             //////DEBUG
-            /*
             cout<<"-------Struct at state "<<lNextUnmarkedIndex<<"----------"<<endl;
             for (gDFADataStruct iStruct : lDFADataVector )
             {
@@ -151,7 +159,7 @@ int main(int argc, char* argv[])
 
                 cout<<"tuples:"<<endl;
 
-                for(tuple<char,vector<int>> iTuple : iStruct.mTransitionsVector)
+                for(tuple<char,vector<int>,int> iTuple : iStruct.mTransitionsVector)
                 {
                     cout<<"     trans "<<get<0>(iTuple)<<": ";
                     for(int itrans: get<1>(iTuple))
@@ -159,11 +167,11 @@ int main(int argc, char* argv[])
                         cout<<itrans<<", ";
                     }
                     cout<<endl;
+                    cout<<"     state "<<get<2>(iTuple)<<endl;
                 }
                 cout<<endl;
             }
             cout<<"-----------------------------------------\n";
-            */
             //////DEBUG
 
 
@@ -407,11 +415,21 @@ void printDFA( vector<gDFADataStruct> aDFAData, NFA aNFA )
     {
         cout << i + 1 << "      ";
         // Iterates through each transition in state
-        for( tuple<char,vector<int>> iTrans : aDFAData[i].mTransitionsVector )
+        for( tuple<char,vector<int>,int> iTrans : aDFAData[i].mTransitionsVector )
         {
             // New state
+            /*
             int lNewState = getClosureOnIndex( aDFAData, get<1>( iTrans ) ) + 1;
             if( lNewState == 0 )
+            {
+                cout << "{}     ";
+            }
+            else
+            {
+                cout << "{" << lNewState << "}    ";
+            }*/
+            int lNewState = get<2>(iTrans);
+            if( lNewState == -1 )
             {
                 cout << "{}     ";
             }
