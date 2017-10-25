@@ -143,6 +143,12 @@ int main(int argc, char* argv[])
     return 0;
 }
 
+/*
+ * Description:
+ * @Param
+ * @Param
+ * @return
+ */
 int VectorExistsAtIndex( vector<gDFADataStruct> aContainingVector, vector<int> aNewState )
 {
     for( int iIndex = 0; iIndex < aContainingVector.size(); iIndex++ )
@@ -170,6 +176,12 @@ int VectorExistsAtIndex( vector<gDFADataStruct> aContainingVector, vector<int> a
     return -1;
 }
 
+/*
+ * Description:
+ * @Param
+ * @Param
+ * @return
+ */
 vector<int> Move( NFA aNFA, vector<int> aStates, char aTransitionCharacter )
 {
     vector<int> lMoveStates;
@@ -192,6 +204,12 @@ vector<int> Move( NFA aNFA, vector<int> aStates, char aTransitionCharacter )
     return lMoveStates;
 }
 
+/*
+ * Description:
+ * @Param
+ * @Param
+ * @return
+ */
 int getTransitionCharacterIndex( NFA aNFA, char aTransitionCharacter )
 {
     for( int i = 0; i < aNFA.mTransitionCharacters.size(); i++ )
@@ -204,6 +222,12 @@ int getTransitionCharacterIndex( NFA aNFA, char aTransitionCharacter )
     return -1;
 }
 
+/*
+ * Description:
+ * @Param
+ * @Param
+ * @return
+ */
 int getNextUnmarkedStateIndex( vector<gDFADataStruct> aDStates )
 {
     for ( int i = 0; i < aDStates.size(); i++ )
@@ -217,6 +241,12 @@ int getNextUnmarkedStateIndex( vector<gDFADataStruct> aDStates )
     return -1;
 }
 
+/*
+ * Description:
+ * @Param
+ * @Param
+ * @return
+ */
 bool UnmarkedStateExists(vector<gDFADataStruct> aDStates)
 {
     for ( gDFADataStruct iStruct : aDStates )
@@ -230,6 +260,12 @@ bool UnmarkedStateExists(vector<gDFADataStruct> aDStates)
     return false;
 }
 
+/*
+ * Description:
+ * @Param
+ * @Param
+ * @return
+ */
 void printEClosure( vector<int> aClosureOnVector, vector<int> aNewStateVector, int aState)
 {
     cout << "E-closure{";
@@ -259,6 +295,12 @@ void printEClosure( vector<int> aClosureOnVector, vector<int> aNewStateVector, i
     }
 }
 
+/*
+ * Description:
+ * @Param
+ * @Param
+ * @return
+ */
 void printTransition( char aTransitionCharacter, vector<int> aInputVector, vector<int> aOutputVector )
 {
     cout << "{";
@@ -289,6 +331,12 @@ void printTransition( char aTransitionCharacter, vector<int> aInputVector, vecto
     }
 }
 
+/*
+ * Description:
+ * @Param
+ * @Param
+ * @return
+ */
 vector<int> EClosure( NFA aNFA, vector<int> aStates )
 {
     unsigned int lNumTransitionCharacters = aNFA.mNumTransitionCharacters;
@@ -323,6 +371,12 @@ vector<int> EClosure( NFA aNFA, vector<int> aStates )
     return lEClosure;
 }
 
+/*
+ * Description:
+ * @Param
+ * @Param
+ * @return
+ */
 void printDFA( vector<gDFADataStruct> aDFAData, NFA aNFA )
 {
     vector<int> lOldInitialState = {aNFA.mInitialState};
@@ -390,6 +444,12 @@ void printDFA( vector<gDFADataStruct> aDFAData, NFA aNFA )
     }
 }
 
+/*
+ * Description:
+ * @Param
+ * @Param
+ * @return
+ */
 vector<int> getEndPointStates( vector<gDFADataStruct> aDFAData, vector<int> aOldStates )
 {
     vector<int> lEndPoints;
